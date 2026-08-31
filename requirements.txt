@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+pandas
+numpy
+lifelines
+scikit-learn
+scikit-survival
+xgboost
+shap
+pydantic
+anthropic
+openai
+langgraph
+faiss-cpu
+sentence-transformers
+pytest
+python-dotenv

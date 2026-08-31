@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+# NOTE: data/telco.csv is the real IBM Telco dataset and is intentionally
+# committed (see data/README.md) -- not excluded here on purpose.
+data/*.tmp

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Churn Intelligence | Competing-Risks Decision Support</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="appShell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brandMark">CR</div>
+        <div class="brandText">
+          <div class="brandTitle">Churn Intelligence</div>
+          <div class="brandSub">Competing-Risks Decision Support</div>
+        </div>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <button class="tabBtn active" data-tab="strawman">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,3 22,20 2,20"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+          <span>Strawman classifier</span>
+        </button>
+        <button class="tabBtn" data-tab="km">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,4 3,12 9,12 9,16 15,16 15,19 21,19"/></svg>
+          <span>Kaplan-Meier</span>
+        </button>
+        <button class="tabBtn" data-tab="cif">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,18 8,10 13,14 21,4"/><polyline points="3,21 8,17 13,19 21,11" opacity="0.5"/></svg>
+          <span>Cumulative incidence</span>
+        </button>
+        <button class="tabBtn" data-tab="cox">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="12" height="3"/><rect x="3" y="11" width="18" height="3"/><rect x="3" y="17" width="8" height="3"/></svg>
+          <span>Cox hazard ratios</span>
+        </button>
+        <button class="tabBtn" data-tab="rsf">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="21" x2="6" y2="15"/><circle cx="6" cy="10" r="5"/><line x1="18" y1="21" x2="18" y2="17"/><circle cx="18" cy="13" r="4"/></svg>
+          <span>Random Survival Forest</span>
+        </button>
+        <button class="tabBtn" data-tab="agent">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><polygon points="8,17 8,21 13,17"/></svg>
+          <span>Ask the agent</span>
+        </button>
+        <button class="tabBtn" data-tab="evaluation">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8,12 11,15 16,9"/></svg>
+          <span>Evaluation</span>
+        </button>
+        <button class="tabBtn" data-tab="quality">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,6 20,12 12,22 4,12 4,6"/></svg>
+          <span>Data quality</span>
+        </button>
+        <button class="tabBtn" data-tab="predict">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><polyline points="4,21 4,19 8,15 16,15 20,19 20,21"/></svg>
+          <span>Predict a customer</span>
+        </button>
+        <button class="tabBtn" data-tab="descriptive">
+          <svg class="tabIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span>Descriptive analytics</span>
+        </button>
+      </nav>
+
+      <div class="sidebarFooter">
+        <span class="liveDot"></span>
+        <div>
+          <div class="sidebarFooterTitle">Real IBM Telco data</div>
+          <div class="sidebarFooterSub">7,043 customers &middot; 4 competing causes</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="mainArea">
+      <header class="topHeader">
+        <div>
+          <h1>Competing-Risks Churn Decision Support</h1>
+          <p class="subtitle">Survival-analysis models + an agent that explains and recommends, grounded in real tool output.</p>
+        </div>
+        <p class="hint scopeNote">Population-level analytics for retention/marketing decision-makers &mdash; see "Predict a customer" for the instance-level view.</p>
+      </header>
+
+      <main>
+        <!-- 1. Strawman -->
+        <section class="card tabPanel" id="panel-strawman">
+          <h2>Deliberate strawman: binary churn classifier</h2>
+          <p class="hint">Ignores censoring and can't distinguish WHICH cause. Included on purpose, as the naive baseline the rest of this project improves on.</p>
+          <button class="loadBtn" data-endpoint="/models/strawman" data-render="renderStrawman">Run model</button>
+          <div id="strawmanOut" class="modelOut"></div>
+        </section>
+
+        <!-- 2. Kaplan-Meier -->
+        <section class="card tabPanel hidden" id="panel-km">
+          <h2>Kaplan-Meier: naive all-cause survival</h2>
+          <p class="hint">Treats every churn reason as the same event. A useful baseline, but can't tell you WHY people are leaving.</p>
+          <button class="loadBtn" data-endpoint="/models/kaplan-meier" data-render="renderKM">Run model</button>
+          <div id="kmOut" class="modelOut"></div>
+        </section>
+
+        <!-- 3. CIF -->
+        <section class="card tabPanel hidden" id="panel-cif">
+          <h2>Aalen-Johansen: cumulative incidence by cause</h2>
+          <p class="hint">The correct competing-risks baseline: one curve per cause, properly accounting for the fact that a customer who churns for one reason can no longer churn for another.</p>
+          <div class="causeButtons" id="cifCauseButtons"></div>
+          <label class="ciToggle">
+            <input type="checkbox" id="ciToggleBox" />
+            Show 95% confidence band (bootstrap, ~5-10s to compute)
+          </label>
+          <canvas id="cifChart" width="720" height="320"></canvas>
+          <div class="divider"></div>
+          <button id="compareBtn">Compare all 4 causes on one chart</button>
+          <canvas id="compareChart" width="720" height="320" class="hidden"></canvas>
+          <div id="crossoverNote" class="crossoverNote hidden"></div>
+        </section>
+
+        <!-- 4. Cox -->
+        <section class="card tabPanel hidden" id="panel-cox">
+          <h2>Cause-specific Cox proportional hazards</h2>
+          <p class="hint">Hazard ratios are associational, not causal: they describe correlation with risk in this data, not the effect of intervening on a customer.</p>
+          <button class="loadBtn" data-endpoint="/models/cox" data-render="renderCox">Run model</button>
+          <div id="coxOut" class="modelOut"></div>
+        </section>
+
+        <!-- 5. RSF -->
+        <section class="card tabPanel hidden" id="panel-rsf">
+          <h2>Random Survival Forest</h2>
+          <p class="hint">Nonlinear/ensemble model over the all-cause event, scored by concordance index (a ranking-quality metric, not an accuracy percentage).</p>
+          <button class="loadBtn" data-endpoint="/models/rsf" data-render="renderRSF">Run model</button>
+          <div id="rsfOut" class="modelOut"></div>
+        </section>
+
+        <!-- 6. Agent -->
+        <section class="card tabPanel hidden" id="panel-agent">
+          <h2>Ask the agent</h2>
+          <p class="hint">Try: "What's the price sensitivity churn rate within 3 months?" or "What does churn look like for new customers?" -- the agent extracts the cause, time horizon, and segment from your question instead of always returning the whole-dataset summary.</p>
+          <textarea id="question" rows="1" placeholder="e.g. What's the churn rate for fiber customers over the first year?"></textarea>
+          <button id="askBtn">Ask</button>
+          <div id="agentOutput" class="modelOut"></div>
+        </section>
+
+        <!-- 7. Evaluation -->
+        <section class="card tabPanel hidden" id="panel-evaluation">
+          <h2>Held-out evaluation</h2>
+          <p class="hint">Real train/test split, evaluated per cause -- not training-set performance. Baseline is a constant risk score for every customer, and should land at ~0.5 by construction: it's the floor every real model should clear.</p>
+          <button class="loadBtn" data-endpoint="/evaluation?n_bootstrap=100" data-render="renderEvaluation">Run evaluation (~15-20s)</button>
+          <div id="evaluationOut" class="modelOut"></div>
+        </section>
+
+        <!-- 8. Data quality -->
+        <section class="card tabPanel hidden" id="panel-quality">
+          <h2>Data validation</h2>
+          <p class="hint">Runs automatically before any model touches the data (see backend/data_validation.py) -- this tab just lets you see the report.</p>
+          <button class="loadBtn" data-endpoint="/validation" data-render="renderValidation">Run validation</button>
+          <div id="validationOut" class="modelOut"></div>
+        </section>
+
+        <!-- 9. Predict a customer -->
+        <section class="card tabPanel hidden" id="panel-predict">
+          <h2>Predict a customer</h2>
+          <p class="hint">Fills unset fields with population defaults and applies the population-fitted Random Survival Forest (and cause-specific Cox, if a cause is selected) to the resulting profile. This is one constructed representative profile, not a real individual customer -- see which fields were stated vs. filled in the result.</p>
+          <div class="formGrid">
+            <label>Contract
+              <select id="pf-contract"><option value="">(population default)</option><option>Month-to-month</option><option>One year</option><option>Two year</option></select>
+            </label>
+            <label>Internet service
+              <select id="pf-internet"><option value="">(population default)</option><option>DSL</option><option>Fiber optic</option><option>No</option></select>
+            </label>
+            <label>Tech support
+              <select id="pf-techsupport"><option value="">(population default)</option><option>Yes</option><option>No</option><option>No internet service</option></select>
+            </label>
+            <label>Payment method
+              <select id="pf-payment"><option value="">(population default)</option><option>Electronic check</option><option>Mailed check</option><option>Bank transfer (automatic)</option><option>Credit card (automatic)</option></select>
+            </label>
+            <label>Senior citizen
+              <select id="pf-senior"><option value="">(population default)</option><option value="true">Yes</option><option value="false">No</option></select>
+            </label>
+            <label>Dependents
+              <select id="pf-dependents"><option value="">(population default)</option><option>Yes</option><option>No</option></select>
+            </label>
+            <label>Paperless billing
+              <select id="pf-paperless"><option value="">(population default)</option><option>Yes</option><option>No</option></select>
+            </label>
+            <label>Phone service
+              <select id="pf-phoneservice"><option value="">(population default)</option><option>Yes</option><option>No</option></select>
+            </label>
+            <label>Multiple lines
+              <select id="pf-multiplelines"><option value="">(population default)</option><option>Yes</option><option>No</option><option>No phone service</option></select>
+            </label>
+            <label>Cause (optional)
+              <select id="pf-cause"><option value="">(no cause -- overall survival only)</option><option>Price sensitivity</option><option>Dissatisfaction</option><option>Competitive loss</option><option>Non-behavioral</option></select>
+            </label>
+            <label>Time horizon (months)
+              <input type="number" id="pf-horizon" value="12" min="1" max="72" />
+            </label>
+          </div>
+          <button id="predictBtn">Predict</button>
+          <div id="predictOut" class="modelOut"></div>
+        </section>
+
+        <!-- 10. Descriptive analytics -->
+        <section class="card tabPanel hidden" id="panel-descriptive">
+          <h2>Descriptive analytics</h2>
+          <p class="hint">Schema-agnostic: every column is classified as numeric or categorical from its actual data type, not a hardcoded list -- this keeps working if the dataset is swapped for a different one following the same format (a CSV at data/telco.csv).</p>
+          <button class="loadBtn" data-endpoint="/descriptive" data-render="renderDescriptive">Load dataset summary</button>
+          <div id="descriptiveOut" class="modelOut"></div>
+        </section>
+      </main>
+
+      <footer>
+        <p>Backend must be running separately: <code>uvicorn backend.main:app --reload</code> (default: http://127.0.0.1:8000). See <code>frontend/config.js</code> to point at a deployed backend.</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

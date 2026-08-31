@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: churn-agent-backend
+    runtime: python
+    plan: starter
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      # Set exactly ONE of these in the Render dashboard (Environment tab) --
+      # never commit a real key here. Neither is required: the agent falls
+      # back to a template-based answer with zero API dependency if unset.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    healthCheckPath: /health

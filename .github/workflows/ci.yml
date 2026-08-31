@@ -1,0 +1,98 @@
+name: CI
+
+# Runs on every push/PR -- two kinds of check, on purpose (see README):
+# ordinary code tests (the 69 regression tests), AND a model-performance
+# gate using survival-appropriate metrics (C-index via IPCW, not accuracy --
+# there's no such thing as "CI for ML models but not survival models",
+# just the right metric for whichever kind of model is in the repo).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt --break-system-packages || pip install -r requirements.txt
+
+      - name: Run test suite
+        run: python -m pytest tests/ -v
+
+      - name: Data validation report
+        run: |
+          python -c "
+          import pandas as pd
+          from backend.data_validation import validate_raw
+          df = pd.read_csv('data/telco.csv')
+          report = validate_raw(df, raise_on_error=True)
+          print(report.summary())
+          "
+
+  model-quality-gate:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt --break-system-packages || pip install -r requirements.txt
+
+      - name: Held-out evaluation must clear baseline
+        # Fast version of scripts/run_evaluation.py's check (fewer bootstrap
+        # resamples, for CI speed) -- fails the build if a real, learnable
+        # cause's C-index regresses to noise. This is "model CI," just using
+        # a survival-appropriate metric (C-index) instead of accuracy/AUC --
+        # same concept as classification-model CI, different metric.
+        run: |
+          python -c "
+          from backend.evaluation import evaluate_all
+
+          result = evaluate_all(n_bootstrap=20, seed=0)
+          failures = []
+          for cause, r in result['by_cause'].items():
+              print(f\"{cause}: baseline={r['baseline_c_index']:.3f} cox={r['cox_c_index']:.3f} rsf={r['rsf_c_index']:.3f}\")
+              # Price sensitivity, Dissatisfaction, and Competitive loss have
+              # strong real signal on this dataset (see data/README.md) --
+              # require both models to clearly beat the naive baseline.
+              # Non-behavioral is intentionally excluded from this gate: its
+              # signal strength depends on the exact data in use and isn't
+              # the point of this check.
+              if cause == 'Non-behavioral':
+                  continue
+              if r['cox_c_index'] < r['baseline_c_index'] + 0.05:
+                  failures.append(f'{cause}: Cox C-index too close to baseline')
+              if r['rsf_c_index'] < r['baseline_c_index'] + 0.05:
+                  failures.append(f'{cause}: RSF C-index too close to baseline')
+
+          if failures:
+              print('MODEL QUALITY GATE FAILED:')
+              for f in failures:
+                  print(' -', f)
+              raise SystemExit(1)
+          print('Model quality gate passed.')
+          "
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t churn-agent-backend -f backend/Dockerfile .
