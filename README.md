@@ -5,8 +5,6 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-teal)
 ![LangGraph](https://img.shields.io/badge/LangGraph-agent-6d6bf5)
 
-> Replace `YOUR-USERNAME/YOUR-REPO` above with your actual GitHub path once
-> pushed, so the CI badge renders correctly.
 
 A production-shaped system that models **why and when** customers churn as
 a *competing-risks survival problem* — not a generic yes/no classifier —
